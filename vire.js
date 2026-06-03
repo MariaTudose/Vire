@@ -190,7 +190,10 @@ function zoneClick(e, zone) {
     pendingZone = zone;
     pendingY = ((e.clientY - chartRect.top) / chartRect.height) * 100;
     document.getElementById("addPanel").classList.add("open");
-    setTimeout(() => document.getElementById("inputReason").focus(), 50);
+    setTimeout(() => {
+        document.getElementById("addPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        document.getElementById("inputReason").focus();
+    }, 50);
 }
 
 function saveEntry() {
