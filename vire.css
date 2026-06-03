@@ -7,33 +7,20 @@
 }
 
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f3;
-  --text-primary: #1a1a1a;
-  --text-secondary: #666;
-  --text-tertiary: #999;
-  --border: rgba(0, 0, 0, 0.12);
-  --border-med: rgba(0, 0, 0, 0.2);
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --color-info-bg: #e6f1fb;
-  --color-info-text: #185fa5;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #1f1f1e;
-    --bg-secondary: #262624;
-    --bg-tertiary: #ffffff;
-    --text-primary: #f0f0f0;
-    --text-secondary: #aaa;
-    --text-tertiary: #666;
-    --text-black: #1a1a1a;
-    --border: rgba(255, 255, 255, 0.1);
-    --border-med: rgba(255, 255, 255, 0.2);
-    --color-info-bg: #0c2a44;
-    --color-info-text: #85b7eb;
-  }
+  --bg-primary: #1f1f1e;
+  --bg-secondary: #262624;
+  --bg-tertiary: #ffffff;
+  --text-primary: #f0f0f0;
+  --text-secondary: #aaa;
+  --text-tertiary: #666;
+  --text-black: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-med: rgba(255, 255, 255, 0.2);
+  --color-info-bg: #0c2a44;
+  --color-info-text: #85b7eb;
+  --color-over: #a32d2d;
+  --color-optimal: #3b6d11;
+  --color-under: #185fa5;
 }
 
 body {
@@ -85,7 +72,7 @@ button {
   font-family: inherit;
 }
 button:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
 }
 
 .nav-row {
@@ -193,13 +180,13 @@ button:hover {
   pointer-events: none;
 }
 .zone-yli .zone-label {
-  color: #a32d2d;
+  color: var(--color-over);
 }
 .zone-opti .zone-label {
-  color: #3b6d11;
+  color: var(--color-optimal);
 }
 .zone-ali .zone-label {
-  color: #185fa5;
+  color: var(--color-under);
 }
 
 .time-axis {
@@ -231,15 +218,15 @@ button:hover {
   transform: translate(-50%, -50%) scale(1.15);
 }
 .dot-yli {
-  background: #e24b4a;
+  background: #f05f5f;
   color: white;
 }
 .dot-opti {
-  background: #639922;
+  background: #7ab731;
   color: white;
 }
 .dot-ali {
-  background: #378add;
+  background: #4a97e5;
   color: white;
 }
 .dot-label {
@@ -252,6 +239,7 @@ button:hover {
   white-space: nowrap;
   color: var(--text-black);
   background: var(--bg-tertiary);
+  opacity: 0.8;
   border: 0.5px solid var(--border);
   border-radius: 4px;
   padding: 1px 4px;

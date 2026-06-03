@@ -16,9 +16,10 @@ const phrases = [
 ];
 
 let pendingZone = null;
+let pendingY = null;
 let currentDate = todayKey();
 let allData = {};
-let showLabels = false;
+let showLabels = true;
 
 function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -109,6 +110,23 @@ function goToday() {
     cancelAdd();
 }
 
+function dominantZone(entries) {
+    const sorted = [...entries].sort((a, b) => a.time.localeCompare(b.time));
+    const END_HOUR = 24;
+    const times = { yli: 0, opti: 0, ali: 0 };
+    sorted.forEach((entry, i) => {
+        const [h, m] = entry.time.split(":").map(Number);
+        const start = h + m / 60;
+        let end = END_HOUR;
+        if (i + 1 < sorted.length) {
+            const [nh, nm] = sorted[i + 1].time.split(":").map(Number);
+            end = nh + nm / 60;
+        }
+        times[entry.zone] += Math.max(0, end - start);
+    });
+    return Object.entries(times).sort((a, b) => b[1] - a[1])[0][0];
+}
+
 function renderHistory() {
     const keys = Object.keys(allData)
         .filter((k) => allData[k] && allData[k].length > 0)
@@ -117,12 +135,8 @@ function renderHistory() {
     const container = document.getElementById("historyDots");
     container.innerHTML = "";
     keys.forEach((k) => {
-        const zones = allData[k].map((e) => e.zone);
-        const color = zones.includes("yli")
-            ? "#E24B4A"
-            : zones.includes("ali")
-                ? "#378ADD"
-                : "#639922";
+        const dominant = dominantZone(allData[k]);
+        const color = dominant === "yli" ? "#E24B4A" : dominant === "ali" ? "#378ADD" : "#639922";
         const dot = document.createElement("button");
         dot.className = "hist-dot" + (k === currentDate ? " active" : "");
         dot.style.background = color;
@@ -148,6 +162,7 @@ function zoneClick(e, zone) {
         `${String(h).padStart(2, "0")}:${String(m >= 60 ? 59 : m).padStart(2, "0")}`;
     document.getElementById("inputReason").value = "";
     pendingZone = zone;
+    pendingY = ((e.clientY - chartRect.top) / chartRect.height) * 100;
     document.getElementById("addPanel").classList.add("open");
     setTimeout(() => document.getElementById("inputReason").focus(), 50);
 }
@@ -157,7 +172,7 @@ function saveEntry() {
     const reason = document.getElementById("inputReason").value.trim();
     if (!time) return;
     const entries = getEntries();
-    entries.push({ zone: pendingZone, time, reason });
+    entries.push({ zone: pendingZone, time, reason, yPct: pendingY });
     entries.sort((a, b) => a.time.localeCompare(b.time));
     setEntries(entries);
     saveData();
@@ -196,13 +211,39 @@ function renderDots() {
     const layer = document.getElementById("dotsLayer");
     layer.innerHTML = "";
     const entries = getEntries();
+    if (!entries.length) return;
     const chartArea = document.getElementById("chartArea");
     const totalH = chartArea.offsetHeight || 240;
     const zoneH = totalH / 3;
-    entries.forEach((entry, i) => {
+
+    const positions = entries.map((entry) => {
         const xPct = Math.min(98, Math.max(2, timeToXpct(entry.time)));
         const zoneIndex = { yli: 0, opti: 1, ali: 2 }[entry.zone];
-        const yPct = (((zoneIndex + 0.5) * zoneH) / totalH) * 100;
+        const yPct = entry.yPct != null
+            ? entry.yPct
+            : (((zoneIndex + 0.5) * zoneH) / totalH) * 100;
+        return { xPct, yPct };
+    });
+
+    if (positions.length > 1) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible";
+        positions.forEach((pos, i) => {
+            if (i === 0) return;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", `${positions[i - 1].xPct}%`);
+            line.setAttribute("y1", `${positions[i - 1].yPct}%`);
+            line.setAttribute("x2", `${pos.xPct}%`);
+            line.setAttribute("y2", `${pos.yPct}%`);
+            line.setAttribute("stroke", "rgba(0,0,0,0.18)");
+            line.setAttribute("stroke-width", "1.5");
+            svg.appendChild(line);
+        });
+        layer.appendChild(svg);
+    }
+
+    entries.forEach((entry, i) => {
+        const { xPct, yPct } = positions[i];
         const dot = document.createElement("div");
         dot.className = `dot dot-${entry.zone}`;
         dot.style.left = `${xPct}%`;
@@ -216,9 +257,7 @@ function renderDots() {
         }
         dot.addEventListener("mouseenter", (e) => showTip(e, entry));
         dot.addEventListener("mouseleave", hideTip);
-        dot.addEventListener("dblclick", () => {
-            removeEntry(i);
-        });
+        dot.addEventListener("dblclick", () => removeEntry(i));
         dot.addEventListener("click", (e) => e.stopPropagation());
         layer.appendChild(dot);
     });
