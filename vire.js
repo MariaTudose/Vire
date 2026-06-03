@@ -112,18 +112,40 @@ function goToday() {
 
 function dominantZone(entries) {
     const sorted = [...entries].sort((a, b) => a.time.localeCompare(b.time));
-    const END_HOUR = 24;
     const times = { yli: 0, opti: 0, ali: 0 };
-    sorted.forEach((entry, i) => {
-        const [h, m] = entry.time.split(":").map(Number);
-        const start = h + m / 60;
-        let end = END_HOUR;
-        if (i + 1 < sorted.length) {
-            const [nh, nm] = sorted[i + 1].time.split(":").map(Number);
-            end = nh + nm / 60;
-        }
-        times[entry.zone] += Math.max(0, end - start);
+
+    const positions = sorted.map((entry) => {
+        const xPct = Math.min(98, Math.max(2, timeToXpct(entry.time)));
+        const zoneIndex = { yli: 0, opti: 1, ali: 2 }[entry.zone];
+        const yPct = entry.yPct != null ? entry.yPct : (zoneIndex + 0.5) * 33.333;
+        return { xPct, yPct };
     });
+
+    if (positions.length === 1) {
+        times[sorted[0].zone] = 1;
+    } else {
+        for (let i = 0; i < positions.length - 1; i++) {
+            const { xPct: x1, yPct: y1 } = positions[i];
+            const { xPct: x2, yPct: y2 } = positions[i + 1];
+            const dy = y2 - y1;
+            const ts = [0, 1];
+            if (dy !== 0) {
+                for (const bound of [33.333, 66.667]) {
+                    const t = (bound - y1) / dy;
+                    if (t > 0 && t < 1) ts.push(t);
+                }
+            }
+            ts.sort((a, b) => a - b);
+            for (let j = 0; j < ts.length - 1; j++) {
+                const tMid = (ts[j] + ts[j + 1]) / 2;
+                const yMid = y1 + tMid * dy;
+                const xSpan = Math.abs((ts[j + 1] - ts[j]) * (x2 - x1));
+                const zone = yMid < 33.333 ? "yli" : yMid < 66.667 ? "opti" : "ali";
+                times[zone] += xSpan;
+            }
+        }
+    }
+
     return Object.entries(times).sort((a, b) => b[1] - a[1])[0][0];
 }
 
