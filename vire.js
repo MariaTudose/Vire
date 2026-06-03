@@ -40,7 +40,7 @@ function keyFromDate(d) {
 }
 function fmtDate(k) {
     return dateFromKey(k).toLocaleDateString("fi-FI", {
-        weekday: "long",
+        weekday: "short",
         day: "numeric",
         month: "long",
         year: "numeric",
