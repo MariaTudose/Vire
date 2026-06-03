@@ -14,13 +14,6 @@
     <div class="container">
       <h1>Vire</h1>
 
-      <div class="phrase-box">
-        <div class="phrase-text" id="phrase"></div>
-        <button onclick="newPhrase()" title="Uusi lause">
-          <i class="ti ti-refresh"></i> Uusi
-        </button>
-      </div>
-
       <div class="nav-row">
         <button onclick="changeDay(-1)">
           <i class="ti ti-chevron-left"></i>
@@ -112,6 +105,10 @@
           <button onclick="cancelAdd()">Peruuta</button>
           <span class="save-status" id="saveStatus"></span>
         </div>
+      </div>
+
+      <div class="phrase-box" id="phraseBox" style="display: none">
+        <div class="phrase-text" id="phrase"></div>
       </div>
     </div>
 

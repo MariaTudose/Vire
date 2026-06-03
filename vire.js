@@ -10,9 +10,13 @@ const phrases = [
     "Tunteeni ovat viestejä, eivät käskyjä.",
     "Juuri nyt riittää, että olen olemassa.",
     "Voin ottaa askeleen taaksepäin ilman, että se on epäonnistuminen.",
-    "Kehoni tietää jotain. Kuuntelen sitä.",
+    "Kehosi tietää jotain. Kuuntele sitä.",
     "Tässäkin tilassa on jotain viisautta.",
-    "Armollisuus itseä kohtaan on harjoitus, ei ominaisuus.",
+    "Armollisuus itseä kohtaan ei synny kerralla — se kasvaa pienistä hetkistä.",
+    "Myrskytkin laantuu. Siihen asti saat olla tuulen liikuttama.",
+    "Lepotila on osa seikkailua, ei sen vastakohta.",
+    "Synkimmässäkin metsässä polku jatkuu.",
+    "Viisaat eivät ryntää eteenpäin — he kuuntelevat ensin.",
 ];
 
 let pendingZone = null;
@@ -201,10 +205,13 @@ function saveEntry() {
     renderDots();
     renderHistory();
     document.getElementById("addPanel").classList.remove("open");
+    newPhrase();
+    document.getElementById("phraseBox").style.display = "flex";
 }
 
 function cancelAdd() {
     document.getElementById("addPanel").classList.remove("open");
+    document.getElementById("phraseBox").style.display = "none";
 }
 
 function toggleLabels() {
